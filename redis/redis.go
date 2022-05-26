@@ -2,8 +2,8 @@ package redis
 
 import (
 	"context"
-	"exstate"
 	"github.com/go-redis/redis/v8"
+	"github.com/m4schini/exstate"
 	"strings"
 	"time"
 )
@@ -119,8 +119,9 @@ func (r *redisSrc) Bool(keys ...string) (exstate.GetBool, exstate.Setter[bool]) 
 	return getter, setter
 }
 
-func (r *redisSrc) Set(keys ...string) (exstate.SetAdd, exstate.SetRemove, exstate.SetContains) {
+func (r *redisSrc) Set(keys ...string) (exstate.SetAdd, exstate.SetGet, exstate.SetRemove, exstate.SetContains) {
 	var adder exstate.SetAdd
+	var getter exstate.SetGet
 	var container exstate.SetContains
 	var remover exstate.SetRemove
 
@@ -129,6 +130,18 @@ func (r *redisSrc) Set(keys ...string) (exstate.SetAdd, exstate.SetRemove, exsta
 		defer cancel()
 
 		r.db.SAdd(ctx, toKey(keys...), value)
+	}
+
+	getter = func() []string {
+		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		defer cancel()
+
+		r, err := r.db.SMembers(ctx, toKey(keys...)).Result()
+		if err != nil {
+			r = make([]string, 0)
+		}
+
+		return r
 	}
 
 	container = func(value interface{}) bool {
@@ -145,7 +158,7 @@ func (r *redisSrc) Set(keys ...string) (exstate.SetAdd, exstate.SetRemove, exsta
 		r.db.SRem(ctx, toKey(keys...), value)
 	}
 
-	return adder, remover, container
+	return adder, getter, remover, container
 }
 
 func (r *redisSrc) Close() {
