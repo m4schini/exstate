@@ -1,4 +1,4 @@
-module exstate
+module github.com/m4schini/exstate
 
 go 1.18
 
