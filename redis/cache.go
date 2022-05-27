@@ -24,18 +24,14 @@ func (r *redisSrc) New(path string, expires time.Duration, refresh func() interf
 
 	getter = func() (interface{}, error) {
 		var result interface{}
-		defer func() {
-			if result == nil {
-				result = refresh()
-				setter(result)
-			}
-		}()
 
 		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
 		defer cancel()
 
 		v, err := r.db.Get(ctx, path).Result()
 		if err == redis.Nil {
+			result = refresh()
+			setter(result)
 			return result, nil
 		}
 		if err != nil {
