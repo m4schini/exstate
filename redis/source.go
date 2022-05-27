@@ -67,7 +67,7 @@ func (r *redisSrc) Int(keys ...string) (exstate.GetInt, exstate.Setter[int]) {
 	setter = func(val int) {
 		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
 		defer cancel()
-		r.db.Set(ctx, toKey(keys...), val, Timeout)
+		r.db.Set(ctx, toKey(keys...), val, 0)
 	}
 
 	return getter, setter
@@ -90,7 +90,7 @@ func (r *redisSrc) Float(keys ...string) (exstate.GetFloat, exstate.Setter[float
 	setter = func(val float64) {
 		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
 		defer cancel()
-		r.db.Set(ctx, toKey(keys...), val, Timeout)
+		r.db.Set(ctx, toKey(keys...), val, 0)
 	}
 
 	return getter, setter
@@ -113,7 +113,7 @@ func (r *redisSrc) Bool(keys ...string) (exstate.GetBool, exstate.Setter[bool]) 
 	setter = func(val bool) {
 		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
 		defer cancel()
-		r.db.Set(ctx, toKey(keys...), val, Timeout)
+		r.db.Set(ctx, toKey(keys...), val, 0)
 	}
 
 	return getter, setter
