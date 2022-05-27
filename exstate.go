@@ -23,11 +23,10 @@ type Source interface {
 	Close()
 }
 
-type Cache interface {
-	CacheString(expires time.Duration, path ...string) (GetString, Setter[string])
-	CacheInt(expires time.Duration, path ...string) (GetInt, Setter[int])
-	CacheFloat(expires time.Duration, path ...string) (GetFloat, Setter[float64])
-	CacheBool(expires time.Duration, path ...string) (GetBool, Setter[bool])
+type GetCacheFunc func() (interface{}, error)
+type SetCacheFunc func(value interface{}) error
 
+type Cache interface {
+	New(path string, expires time.Duration, refresh func() interface{}) (GetCacheFunc, SetCacheFunc, error)
 	Close()
 }
